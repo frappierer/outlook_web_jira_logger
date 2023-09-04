@@ -1,0 +1,191 @@
+/* Global styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Button styles */
+#toggleSidebarButton {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    padding: 10px;
+    font-size: 16px;
+    background-color: #007bff; /* Google Material Design primary color */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#toggleSidebarButton:hover {
+    background-color: #0056b3; /* Darker shade for hover effect */
+}
+
+/* Sidebar styles */
+.sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 600px;
+    height: 100%;
+    background-color: #f0f0f0;
+    border-left: 1px solid #ccc;
+    overflow-y: scroll;
+    padding: 10px;
+    box-sizing: border-box;
+    display: none;
+    box-shadow: -2px 0 4px rgba(0, 0, 0, 0.1);
+}
+
+#sidebar.active {
+    right: 0;
+}
+
+/* Log to JIRA button styles */
+#logToJiraButton {
+    margin-top: 20px;
+    background-color: #007bff; /* Google Material Design primary color */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#logToJiraButton:hover {
+    background-color: #0056b3; /* Darker shade for hover effect */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Date section styles */
+.date-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #ccc;
+}
+
+.date-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.date-text {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.date-sum {
+    font-size: 16px;
+    color: #888;
+}
+
+/* Meeting item styles */
+.meeting-item {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.meeting-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.meeting-info {
+    flex: 1;
+}
+
+.meeting-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.meeting-time {
+    font-size: 14px;
+    color: #888;
+}
+
+.jira-ticket-input {
+    width: 100px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+/* Delete button styles */
+.delete-button {
+    background-color: #e74c3c;
+    border: none;
+    color: white;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 16px;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.delete-button:hover {
+    background-color: #c0392b;
+}
+
+/* Success indicator styles */
+.success-indicator {
+    color: green;
+    font-size: 18px;
+    margin-left: 10px;
+}
+
+/* Additional Material Design classes */
+.mdc-fab {
+    position: relative;
+    display: inline-block;
+    border-radius: 50%;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.mdc-fab--extended {
+    padding: 0 16px;
+}
+
+.mdc-fab__ripple {
+    position: absolute;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.1);
+    animation: ripple-animation 0.6s linear;
+}
+
+.material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+}
+
+@keyframes ripple-animation {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
