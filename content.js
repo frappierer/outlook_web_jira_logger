@@ -1,4 +1,4 @@
-var groupedMeetings = {};  // Declare groupedMeetings at the top level
+var groupedMeetings = {}; // Declare groupedMeetings at the top level
 
 if (typeof jQuery == 'undefined') {
     var script = document.createElement('script');
@@ -14,6 +14,8 @@ if (typeof jQuery == 'undefined') {
 
 function toggleSidebar() {
     $('#sidebar').toggle();
+    $('#toggleSidebarButton').toggle();  // This will toggle the visibility of the button
+
     if ($('#sidebar').is(':visible')) {
         extractMeetingDetails();
     }
@@ -23,22 +25,34 @@ function toggleSidebar() {
 function initializeUI() {
 
     // Create a button to show/hide the sidebar
-    let button = $('<button id="toggleSidebarButton">Toggle Sidebar</button>');
+    let button = $('<button id="toggleSidebarButton">Log Meetings</button>');
     button.addClass('toggle-sidebar-button');
 
     button.click(toggleSidebar);
     $('body').append(button);
-    // Adding styles for delete buttons
-    
 
     // Link the styles.css file
     let cssLink = $('<link rel="stylesheet" type="text/css" href="styles.css">');
     $('head').append(cssLink);
 
     // Create a sidebar to display the event details
-   
-    let sidebar = $('<div id="sidebar"></div>').addClass('sidebar');
+
+    // Create a sidebar to display the event details
+    let sidebar = $('<div id="sidebar" style="display: none;"></div>').addClass('sidebar');
     $('body').append(sidebar);
+
+    // Event listener to close the sidebar when clicking outside of it
+    $(document).on('click', function(event) {
+        if (!$(event.target).closest('#sidebar').length && !$(event.target).is('#toggleSidebarButton')) {
+            if ($('#sidebar').is(':visible')) {
+                toggleSidebar();
+            }
+        }
+    });
+    // Add this to stop the propagation of the click event inside the sidebar
+$('#sidebar').on('click', function(event) {
+    event.stopPropagation();
+});
 }
 
 // Mapping of German month names to numerical values
@@ -109,14 +123,14 @@ function extractMeetingDetails() {
         }
     });
 
-        Promise.all(meetingPromises).then((resolvedMeetings) => {
-                groupedMeetings = groupBy(resolvedMeetings, 'date');
-                populateSidebar(groupedMeetings);
+    Promise.all(meetingPromises).then((resolvedMeetings) => {
+        groupedMeetings = groupBy(resolvedMeetings, 'date');
+        populateSidebar(groupedMeetings);
 
-                // Calculate the total sum of minutes for each date
-                calculateTotalMinutes(groupedMeetings);
-            });
-        }
+        // Calculate the total sum of minutes for each date
+        calculateTotalMinutes(groupedMeetings);
+    });
+}
 
 function calculateTotalMinutes(groupedMeetings) {
     for (let [date, dateMeetings] of Object.entries(groupedMeetings)) {
@@ -126,7 +140,7 @@ function calculateTotalMinutes(groupedMeetings) {
         $(`.date-section[data-date-section="${date}"] .date-sum`).text(` (${hours} hours and ${minutes} minutes)`);
     }
 }
-    // Group meetings by date and populate the sidebar
+// Group meetings by date and populate the sidebar
 function populateSidebar(groupedMeetings) {
     let sidebar = $('#sidebar');
     sidebar.empty();
@@ -138,16 +152,16 @@ function populateSidebar(groupedMeetings) {
 
         dateSection.append(dateHeader);
         dateMeetings.forEach((meeting, index) => {
-                let uniqueId = `${meeting.date}|${meeting.startTimeISO}`;
-                dateSection.append(`<div class="meeting-item" data-unique-id="${uniqueId}">Title: ${meeting.title} - <input type="text" value="${meeting.durationMinutes}" class="minutes-input" style="width: 40px;"> min.<input type="text" value="${meeting.jiraTicket}" class="jira-ticket-input"><button data-date="${date}" data-unique-id="${uniqueId}" class="delete-meeting-button">X</button></div>`);
+            let uniqueId = `${meeting.date}|${meeting.startTimeISO}`;
+            dateSection.append(`<div class="meeting-item" data-unique-id="${uniqueId}">Title: ${meeting.title} - <input type="text" value="${meeting.durationMinutes}" class="minutes-input" style="width: 40px;"> min.<input type="text" value="${meeting.jiraTicket}" class="jira-ticket-input"><button data-date="${date}" data-unique-id="${uniqueId}" class="delete-meeting-button">X</button></div>`);
 
-                // Add event listener to the input field
-                let minutesInputElement = dateSection.find('.minutes-input').last();
-                minutesInputElement.change(function() {
-                    let minutesValue = parseInt($(this).val());
-                    $(this).siblings('.meeting-minutes').text(`${minutesValue} min.`);
-                    updateDateSum(date); // Update the date sum
-                });
+            // Add event listener to the input field
+            let minutesInputElement = dateSection.find('.minutes-input').last();
+            minutesInputElement.change(function() {
+                let minutesValue = parseInt($(this).val());
+                $(this).siblings('.meeting-minutes').text(`${minutesValue} min.`);
+                updateDateSum(date); // Update the date sum
+            });
             let focusedInputElement;
             let inputElement = dateSection.find('.jira-ticket-input').last();
             inputElement.focus(function() {
@@ -160,7 +174,7 @@ function populateSidebar(groupedMeetings) {
         });
 
         sidebar.append(dateSection);
-        updateDateSum(date);  // Call the new updateDateSum function here
+        updateDateSum(date); // Call the new updateDateSum function here
 
     }
 
@@ -177,34 +191,34 @@ function populateSidebar(groupedMeetings) {
 
     // Add event listeners for delete buttons
     $('.delete-date-button').click(function() {
-    let dateToDelete = $(this).attr('data-date');
-    delete groupedMeetings[dateToDelete];  // remove the entry from groupedMeetings
-    $(`.date-section:contains(${dateToDelete})`).remove();
+        let dateToDelete = $(this).attr('data-date');
+        delete groupedMeetings[dateToDelete]; // remove the entry from groupedMeetings
+        $(`.date-section:contains(${dateToDelete})`).remove();
     });
 
     $('.delete-meeting-button').click(function() {
-    let uniqueId = $(this).data('unique-id');
-    let [date, startTimeISO] = uniqueId.split('|');
-    console.log('Unique ID:', uniqueId);
-    console.log('Date:', date);
-    console.log('Start Time ISO:', startTimeISO);
-    let meetingIndex = groupedMeetings[date].findIndex(meeting => meeting.startTimeISO === startTimeISO);
+        let uniqueId = $(this).data('unique-id');
+        let [date, startTimeISO] = uniqueId.split('|');
+        //console.log('Unique ID:', uniqueId);
+        //console.log('Date:', date);
+        //console.log('Start Time ISO:', startTimeISO);
+        let meetingIndex = groupedMeetings[date].findIndex(meeting => meeting.startTimeISO === startTimeISO);
 
-    if (meetingIndex >= 0) {
-        groupedMeetings[date].splice(meetingIndex, 1);
-        $(`.meeting-item[data-unique-id="${uniqueId}"]`).remove();
+        if (meetingIndex >= 0) {
+            groupedMeetings[date].splice(meetingIndex, 1);
+            $(`.meeting-item[data-unique-id="${uniqueId}"]`).remove();
 
-        if (groupedMeetings[date].length === 0) {
-            delete groupedMeetings[date];
-            $(`.date-section[data-date-section="${date}"]`).remove();
+            if (groupedMeetings[date].length === 0) {
+                delete groupedMeetings[date];
+                $(`.date-section[data-date-section="${date}"]`).remove();
+            } else {
+                updateDateSum(date);
+            }
         } else {
-            updateDateSum(date);
+            console.error('Unable to find meeting with unique identifier:', uniqueId);
+            console.error('Current state of groupedMeetings at error:', groupedMeetings);
         }
-    } else {
-        console.error('Unable to find meeting with unique identifier:', uniqueId);
-        console.error('Current state of groupedMeetings at error:', groupedMeetings);
-    }
-});
+    });
 
 
 
@@ -239,17 +253,17 @@ function updateSuccessIndicator(ticketNumber, date, index) {
 }
 
 function logToJira(groupedMeetings) {
-    console.log("Logging to JIRA...");
+    //console.log("Logging to JIRA...");
 
     $('.date-section').each(function() {
-        console.log("Inside date section loop");
+        //console.log("Inside date section loop");
         let date = $(this).find('.date-text').text();
-        console.log("Date:", date);
+        //console.log("Date:", date);
         let dateMeetings = groupedMeetings[date]; // Get the array of meetings for the current date
-        console.log("Date Meetings:", dateMeetings);
+        //console.log("Date Meetings:", dateMeetings);
 
         $(this).find('.meeting-item').each(function(index) {
-            console.log("Inside meeting item loop");
+            //console.log("Inside meeting item loop");
             let meeting = dateMeetings[index];
             let title = meeting.title;
             let time = meeting.time;
@@ -257,30 +271,26 @@ function logToJira(groupedMeetings) {
             let minutesInput = $(this).find('.minutes-input'); // Add this line
             let minutesValue = parseInt(minutesInput.val()); // Add this line
             let timeInSeconds = minutesValue * 60; // Add this line
-                    //trim to remove spacees 
+            //trim to remove spacees 
             let ticketNumber = $(this).find('.jira-ticket-input').val().trim();
-            console.log(`Logging time for ticket ${ticketNumber}: Date: ${date}, Title: ${title}, Time: ${time}`);
+            //console.log(`Logging time for ticket ${ticketNumber}: Date: ${date}, Title: ${title}, Time: ${time}`);
             // Convert time from minutes to seconds for Jira API
-           // let timeInSeconds = parseInt(time.match(/\d+/)[0]) * 60;
+            // let timeInSeconds = parseInt(time.match(/\d+/)[0]) * 60;
 
             // Setting up the request payload
             let payload = JSON.stringify({
                 "comment": {
-                    "content": [
-                        {
-                            "content": [
-                                {
-                                    "text": title,
-                                    "type": "text"
-                                }
-                            ],
-                            "type": "paragraph"
-                        }
-                    ],
+                    "content": [{
+                        "content": [{
+                            "text": title,
+                            "type": "text"
+                        }],
+                        "type": "paragraph"
+                    }],
                     "type": "doc",
                     "version": 1
                 },
-                "started": meeting.startTimeISO,  // Use the stored start time
+                "started": meeting.startTimeISO, // Use the stored start time
                 "timeSpentSeconds": timeInSeconds
             });
 
@@ -294,8 +304,11 @@ function logToJira(groupedMeetings) {
             };
 
             // Send message to background script
-            chrome.runtime.sendMessage({action: "logToJira", details: details}, response => {
-                console.log(response.message);
+            chrome.runtime.sendMessage({
+                action: "logToJira",
+                details: details
+            }, response => {
+                //console.log(response.message);
                 if (response.success) {
                     updateSuccessIndicator(details.ticketNumber, details.date, index);
                 }
@@ -326,14 +339,10 @@ function populateTicketDropdown(inputElement) {
 }
 // Use event delegation to handle click events on ticket options
 $(document.body).on('click', '.ticket-option', function() {
-    console.log("Option clicked:", $(this).text()); // Log the clicked option's text
+    //console.log("Option clicked:", $(this).text()); // Log the clicked option's text
     let ticketNumber = $(this).text().split(' ')[0]; // Extract the ticket number from the option text
     let $inputElement = $('.jira-ticket-input:focus'); // Find the focused input element
-    console.log("$inputElement:", $inputElement);
+    //console.log("$inputElement:", $inputElement);
     $inputElement.val(ticketNumber); // Set the value of the input element
     $('.ticket-dropdown').remove(); // Remove the dropdown
 });
-
-
-
-

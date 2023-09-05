@@ -123,19 +123,19 @@ body {
 }
 
 /* Delete button styles */
-.delete-button {
-    background-color: #e74c3c;
-    border: none;
-    color: white;
-    padding: 5px;
-    cursor: pointer;
-    border-radius: 50%;
-    font-size: 16px;
-    transition: background-color 0.3s ease-in-out;
+.delete-date-button, .delete-meeting-button {
+    background-color: #ff4d4d; /* Red background color */
+    color: white; /* White text color */
+    border: none; /* Remove border */
+    border-radius: 50%; /* Circular button */
+    padding: 2px 5px; /* Reduced padding to make the button smaller */
+    cursor: pointer; /* Pointer cursor on hover */
+    font-size: 10px; /* Reduced font size of the X */
+    transition: background-color 0.3s; /* Transition for hover effect */
 }
 
-.delete-button:hover {
-    background-color: #c0392b;
+.delete-date-button:hover, .delete-meeting-button:hover {
+    background-color: #cc0000; /* Darker red background color on hover */
 }
 
 /* Success indicator styles */
@@ -205,4 +205,9 @@ body {
 
 .ticket-option:hover {
     background-color: #f1f1f1;
+}
+
+.material-icons {
+    color: red;
+    font-size: 20px;
 }
