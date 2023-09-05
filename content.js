@@ -91,9 +91,10 @@ function extractMeetingDetails() {
                 let endDate = new Date(`${dateAndTimeMatch[3]}-${monthNames[dateAndTimeMatch[2]]}-${dateAndTimeMatch[1]}T${dateAndTimeMatch[6]}:${dateAndTimeMatch[7]}:00.000+0000`);
                 let durationMinutes = (endDate - startDate) / (1000 * 60);
 
-                meeting.time = `${durationMinutes} minutes`;
+                meeting.time = `${durationMinutes} minutes`; // Store as a string
+                meeting.durationMinutes = durationMinutes; // Store as a number
                 meeting.date = `${dateAndTimeMatch[1]}.${monthNames[dateAndTimeMatch[2]]}.${dateAndTimeMatch[3]}`;
-                meeting.startTimeISO = startDate.toISOString().replace('Z', '+0000');  // Modify the format to match the one used in your Python script
+                meeting.startTimeISO = startDate.toISOString().replace('Z', '+0000');
             }
         }
 
@@ -108,12 +109,23 @@ function extractMeetingDetails() {
         }
     });
 
-    Promise.all(meetingPromises).then((resolvedMeetings) => {
-        groupedMeetings = groupBy(resolvedMeetings, 'date');
-        populateSidebar(groupedMeetings);
-    });
-}
+        Promise.all(meetingPromises).then((resolvedMeetings) => {
+                groupedMeetings = groupBy(resolvedMeetings, 'date');
+                populateSidebar(groupedMeetings);
 
+                // Calculate the total sum of minutes for each date
+                calculateTotalMinutes(groupedMeetings);
+            });
+        }
+
+function calculateTotalMinutes(groupedMeetings) {
+    for (let [date, dateMeetings] of Object.entries(groupedMeetings)) {
+        let totalMinutes = dateMeetings.reduce((sum, meeting) => sum + meeting.durationMinutes, 0);
+        let hours = Math.floor(totalMinutes / 60);
+        let minutes = totalMinutes % 60;
+        $(`.date-section[data-date-section="${date}"] .date-sum`).text(` (${hours} hours and ${minutes} minutes)`);
+    }
+}
     // Group meetings by date and populate the sidebar
 function populateSidebar(groupedMeetings) {
     let sidebar = $('#sidebar');
@@ -124,20 +136,22 @@ function populateSidebar(groupedMeetings) {
         let dateHeader = $('<div class="date-header"><span class="date-text"></span><span class="date-sum"></span><button data-date="' + date + '" class="delete-date-button">X</button></div>');
         dateHeader.find('.date-text').text(date);
 
-        // Your snippet for calculating the sum of hours for each day
-        let totalMinutes = dateMeetings.reduce((sum, meeting) => sum + parseInt(meeting.time.match(/\d+/)[0]), 0);
-        let hours = Math.floor(totalMinutes / 60);
-        let minutes = totalMinutes % 60;
-        dateHeader.find('.date-sum').text(` (${hours} hours and ${minutes} minutes)`);
-
         dateSection.append(dateHeader);
         dateMeetings.forEach((meeting, index) => {
-            let uniqueId = `${meeting.date}|${meeting.startTimeISO}`;
-            dateSection.append(`<div class="meeting-item" data-unique-id="${uniqueId}">Title: ${meeting.title}, Time: ${meeting.time}<input type="text" value="${meeting.jiraTicket}" class="jira-ticket-input"><button data-date="${date}" data-unique-id="${uniqueId}" class="delete-meeting-button">X</button></div>`);
+                let uniqueId = `${meeting.date}|${meeting.startTimeISO}`;
+                dateSection.append(`<div class="meeting-item" data-unique-id="${uniqueId}">Title: ${meeting.title} - <input type="text" value="${meeting.durationMinutes}" class="minutes-input" style="width: 40px;"> min.<input type="text" value="${meeting.jiraTicket}" class="jira-ticket-input"><button data-date="${date}" data-unique-id="${uniqueId}" class="delete-meeting-button">X</button></div>`);
 
-            // Add event listener to the input field
+                // Add event listener to the input field
+                let minutesInputElement = dateSection.find('.minutes-input').last();
+                minutesInputElement.change(function() {
+                    let minutesValue = parseInt($(this).val());
+                    $(this).siblings('.meeting-minutes').text(`${minutesValue} min.`);
+                    updateDateSum(date); // Update the date sum
+                });
+            let focusedInputElement;
             let inputElement = dateSection.find('.jira-ticket-input').last();
             inputElement.focus(function() {
+                focusedInputElement = inputElement; // Store the reference to the focused input element
                 populateTicketDropdown(inputElement);
             });
             inputElement.blur(function() {
@@ -146,6 +160,8 @@ function populateSidebar(groupedMeetings) {
         });
 
         sidebar.append(dateSection);
+        updateDateSum(date);  // Call the new updateDateSum function here
+
     }
 
     // Adding "Log to JIRA" button
@@ -195,15 +211,24 @@ function populateSidebar(groupedMeetings) {
 
 }
 
+
 function updateDateSum(date) {
-    let dateMeetings = groupedMeetings[date];
-    if (dateMeetings) {
-        let totalMinutes = dateMeetings.reduce((sum, meeting) => sum + parseInt(meeting.time.match(/\d+/)[0]), 0);
-        let hours = Math.floor(totalMinutes / 60);
-        let minutes = totalMinutes % 60;
-        $(`.date-section[data-date-section="${date}"]`).find('.date-sum').text(` (${hours} hours and ${minutes} minutes)`);
-    }
+    const dateSection = document.querySelector(`.date-section[data-date-section="${date}"]`);
+    const valueInputs = dateSection.querySelectorAll('.minutes-input');
+
+    let sum = 0;
+    valueInputs.forEach((input) => {
+        const value = input.value;
+        if (value) {
+            sum += parseInt(value, 10);
+        }
+    });
+
+    let hours = Math.floor(sum / 60);
+    let minutes = sum % 60;
+    dateSection.querySelector('.date-sum').textContent = ` (${hours} hours and ${minutes} minutes)`;
 }
+
 
 
 function updateSuccessIndicator(ticketNumber, date, index) {
@@ -228,11 +253,15 @@ function logToJira(groupedMeetings) {
             let meeting = dateMeetings[index];
             let title = meeting.title;
             let time = meeting.time;
-            //trim to remove spacees 
+
+            let minutesInput = $(this).find('.minutes-input'); // Add this line
+            let minutesValue = parseInt(minutesInput.val()); // Add this line
+            let timeInSeconds = minutesValue * 60; // Add this line
+                    //trim to remove spacees 
             let ticketNumber = $(this).find('.jira-ticket-input').val().trim();
             console.log(`Logging time for ticket ${ticketNumber}: Date: ${date}, Title: ${title}, Time: ${time}`);
             // Convert time from minutes to seconds for Jira API
-            let timeInSeconds = parseInt(time.match(/\d+/)[0]) * 60;
+           // let timeInSeconds = parseInt(time.match(/\d+/)[0]) * 60;
 
             // Setting up the request payload
             let payload = JSON.stringify({
@@ -276,17 +305,35 @@ function logToJira(groupedMeetings) {
 }
 
 function populateTicketDropdown(inputElement) {
+    let $inputElement = $(inputElement); // Convert inputElement to a jQuery object
     chrome.storage.sync.get(['recentTickets'], (result) => {
         let recentTickets = result.recentTickets || [];
         let dropdown = $('<div class="ticket-dropdown"></div>');
         recentTickets.forEach(ticketDetails => {
             let option = $(`<div class="ticket-option">${ticketDetails.ticketNumber} - ${ticketDetails.ticketName} - ${ticketDetails.projectName}</div>`);
-            option.click(function() {
-                inputElement.val(ticketDetails.ticketNumber);
-                dropdown.remove();
-            });
             dropdown.append(option);
         });
-        dropdown.insertAfter(inputElement);
+
+        // Add event listener to capture the selected option
+        dropdown.on('mousedown', '.ticket-option', function() {
+            let ticketNumber = $(this).text().split(' ')[0];
+            $inputElement.val(ticketNumber); // Update the input field's value
+            dropdown.remove(); // Remove the dropdown
+        });
+
+        dropdown.insertAfter($inputElement); // Use $inputElement here
     });
 }
+// Use event delegation to handle click events on ticket options
+$(document.body).on('click', '.ticket-option', function() {
+    console.log("Option clicked:", $(this).text()); // Log the clicked option's text
+    let ticketNumber = $(this).text().split(' ')[0]; // Extract the ticket number from the option text
+    let $inputElement = $('.jira-ticket-input:focus'); // Find the focused input element
+    console.log("$inputElement:", $inputElement);
+    $inputElement.val(ticketNumber); // Set the value of the input element
+    $('.ticket-dropdown').remove(); // Remove the dropdown
+});
+
+
+
+
