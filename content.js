@@ -69,6 +69,7 @@ function groupBy(array, property) {
 
 function extractMeetingDetails() {
     let meetings = [];
+    let meetingPromises = [];
     // Extract meeting details as before, but now we will also group them by date
     $('div[role="button"][class*="root-"]').each(function() {
         let meeting = {};
@@ -84,7 +85,6 @@ function extractMeetingDetails() {
         let ariaLabel = $(this).attr('aria-label');
         if (ariaLabel) {
             let dateAndTimeMatch = ariaLabel.match(/(\d{2})\. (\w+) (\d{4}) (\d{2}):(\d{2}) bis (\d{2}):(\d{2})/);
-            
 
             if (dateAndTimeMatch) {
                 let startDate = new Date(`${dateAndTimeMatch[3]}-${monthNames[dateAndTimeMatch[2]]}-${dateAndTimeMatch[1]}T${dateAndTimeMatch[4]}:${dateAndTimeMatch[5]}:00.000+0000`);
@@ -94,20 +94,28 @@ function extractMeetingDetails() {
                 meeting.time = `${durationMinutes} minutes`;
                 meeting.date = `${dateAndTimeMatch[1]}.${monthNames[dateAndTimeMatch[2]]}.${dateAndTimeMatch[3]}`;
                 meeting.startTimeISO = startDate.toISOString().replace('Z', '+0000');  // Modify the format to match the one used in your Python script
-                meeting.jiraTicket = "CWSA-1"; // Default JIRA ticket number
-
-                console.log("Formatted Start Time:", meeting.startTimeISO);  // Log the formatted start time to the console
             }
-
-
         }
+
         if (meeting.title && meeting.time && meeting.date) {
-            meetings.push(meeting);
+            let meetingPromise = new Promise((resolve, reject) => {
+                chrome.storage.sync.get(['defaultJiraTicket'], (result) => {
+                    meeting.jiraTicket = result.defaultJiraTicket || "CWSA-1";
+                    resolve(meeting);
+                });
+            });
+            meetingPromises.push(meetingPromise);
         }
     });
 
+    Promise.all(meetingPromises).then((resolvedMeetings) => {
+        groupedMeetings = groupBy(resolvedMeetings, 'date');
+        populateSidebar(groupedMeetings);
+    });
+}
+
     // Group meetings by date and populate the sidebar
-    groupedMeetings = groupBy(meetings, 'date');
+function populateSidebar(groupedMeetings) {
     let sidebar = $('#sidebar');
     sidebar.empty();
     for (let [date, dateMeetings] of Object.entries(groupedMeetings)) {
@@ -126,6 +134,15 @@ function extractMeetingDetails() {
         dateMeetings.forEach((meeting, index) => {
             let uniqueId = `${meeting.date}|${meeting.startTimeISO}`;
             dateSection.append(`<div class="meeting-item" data-unique-id="${uniqueId}">Title: ${meeting.title}, Time: ${meeting.time}<input type="text" value="${meeting.jiraTicket}" class="jira-ticket-input"><button data-date="${date}" data-unique-id="${uniqueId}" class="delete-meeting-button">X</button></div>`);
+
+            // Add event listener to the input field
+            let inputElement = dateSection.find('.jira-ticket-input').last();
+            inputElement.focus(function() {
+                populateTicketDropdown(inputElement);
+            });
+            inputElement.blur(function() {
+                $('.ticket-dropdown').remove();
+            });
         });
 
         sidebar.append(dateSection);
@@ -211,7 +228,8 @@ function logToJira(groupedMeetings) {
             let meeting = dateMeetings[index];
             let title = meeting.title;
             let time = meeting.time;
-            let ticketNumber = $(this).find('.jira-ticket-input').val();
+            //trim to remove spacees 
+            let ticketNumber = $(this).find('.jira-ticket-input').val().trim();
             console.log(`Logging time for ticket ${ticketNumber}: Date: ${date}, Title: ${title}, Time: ${time}`);
             // Convert time from minutes to seconds for Jira API
             let timeInSeconds = parseInt(time.match(/\d+/)[0]) * 60;
@@ -254,5 +272,21 @@ function logToJira(groupedMeetings) {
                 }
             });
         });
+    });
+}
+
+function populateTicketDropdown(inputElement) {
+    chrome.storage.sync.get(['recentTickets'], (result) => {
+        let recentTickets = result.recentTickets || [];
+        let dropdown = $('<div class="ticket-dropdown"></div>');
+        recentTickets.forEach(ticketDetails => {
+            let option = $(`<div class="ticket-option">${ticketDetails.ticketNumber} - ${ticketDetails.ticketName} - ${ticketDetails.projectName}</div>`);
+            option.click(function() {
+                inputElement.val(ticketDetails.ticketNumber);
+                dropdown.remove();
+            });
+            dropdown.append(option);
+        });
+        dropdown.insertAfter(inputElement);
     });
 }

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Extension Options</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+    <form id="options-form">
+        <label>
+            JIRA Email:
+            <input type="email" id="jira-email" name="jira-email">
+        </label>
+        <br>
+        <label>
+            JIRA API Token:
+            <input type="password" id="jira-api-token" name="jira-api-token">
+        </label>
+        <br>
+        <label>
+            JIRA Base URL:
+            <input type="url" id="jira-base-url" name="jira-base-url">
+        </label>
+        <br>
+        <label>
+            Default JIRA Ticket Number:
+            <input type="text" id="default-jira-ticket" name="default-jira-ticket">
+        </label>
+        <br>
+        <button type="submit">Save</button>
+    </form>
+
+    <button type="button" id="clear-storage-button">Clear Dropdown Ticket Values</button>
+
+
+    <script src="options.js"></script>
+</body>
+</html>

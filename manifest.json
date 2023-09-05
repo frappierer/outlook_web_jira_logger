@@ -3,6 +3,7 @@
   "name": "Outlook Meeting Extractor",
   "version": "1.0",
   "description": "Extract meeting details from Outlook web view and log them to JIRA",
+  "options_page": "options.html",
   "action": {
     "default_icon": {
       "16": "images/icon16.png",
