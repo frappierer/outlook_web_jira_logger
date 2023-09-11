@@ -24,7 +24,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://outlook.office365.com/calendar/view/*"],
+      "matches": ["https://*/calendar/view/*"],
       "js": ["libs/jquery-3.6.0.min.js", "content.js"],
       "css": ["styles.css", "content.js"],
       "run_at": "document_end"
