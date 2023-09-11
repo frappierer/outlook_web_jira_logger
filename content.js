@@ -152,8 +152,8 @@ function populateSidebar(groupedMeetings) {
 
         dateSection.append(dateHeader);
         dateMeetings.forEach((meeting, index) => {
-            let uniqueId = `${meeting.date}|${meeting.startTimeISO}`;
-            dateSection.append(`<div class="meeting-item" data-unique-id="${uniqueId}">Title: ${meeting.title} - <input type="text" value="${meeting.durationMinutes}" class="minutes-input" style="width: 40px;"> min.<input type="text" value="${meeting.jiraTicket}" class="jira-ticket-input"><button data-date="${date}" data-unique-id="${uniqueId}" class="delete-meeting-button">X</button></div>`);
+            let uniqueId = `${meeting.date}|${meeting.startTimeISO}|${simpleHash(meeting.title)}`;
+            dateSection.append(`<div class="meeting-item" data-unique-id="${uniqueId}">Title: ${meeting.title} - <input type="text" value="${meeting.durationMinutes}" class="minutes-input" style="width: 40px;"> min.<input type="text" value="${meeting.jiraTicket}" class="jira-ticket-input"><button data-date="${date}" data-unique-id="${date}|${meeting.startTimeISO}|${simpleHash(meeting.title)}" class="delete-meeting-button">X</button></div>`);
 
             // Add event listener to the input field
             let minutesInputElement = dateSection.find('.minutes-input').last();
@@ -196,29 +196,30 @@ function populateSidebar(groupedMeetings) {
         $(`.date-section:contains(${dateToDelete})`).remove();
     });
 
-    $('.delete-meeting-button').click(function() {
-        let uniqueId = $(this).data('unique-id');
-        let [date, startTimeISO] = uniqueId.split('|');
-        //console.log('Unique ID:', uniqueId);
-        //console.log('Date:', date);
-        //console.log('Start Time ISO:', startTimeISO);
-        let meetingIndex = groupedMeetings[date].findIndex(meeting => meeting.startTimeISO === startTimeISO);
+    $('.delete-meeting-button').click(function(event) {
+    event.stopPropagation();
 
-        if (meetingIndex >= 0) {
-            groupedMeetings[date].splice(meetingIndex, 1);
-            $(`.meeting-item[data-unique-id="${uniqueId}"]`).remove();
+    let uniqueId = $(this).data('unique-id');
+    let [date, startTimeISO, titleHash] = uniqueId.split('|');
 
-            if (groupedMeetings[date].length === 0) {
-                delete groupedMeetings[date];
-                $(`.date-section[data-date-section="${date}"]`).remove();
-            } else {
-                updateDateSum(date);
-            }
+    let meetingIndex = groupedMeetings[date].findIndex(meeting => meeting.startTimeISO === startTimeISO && simpleHash(meeting.title) === parseInt(titleHash));
+
+    if (meetingIndex >= 0) {
+        groupedMeetings[date].splice(meetingIndex, 1);
+        $(`.meeting-item[data-unique-id="${uniqueId}"]`).remove();
+
+        if (groupedMeetings[date].length === 0) {
+            delete groupedMeetings[date];
+            $(`.date-section[data-date-section="${date}"]`).remove();
         } else {
-            console.error('Unable to find meeting with unique identifier:', uniqueId);
-            console.error('Current state of groupedMeetings at error:', groupedMeetings);
+            updateDateSum(date);
         }
-    });
+    } else {
+        console.error('Unable to find meeting with unique identifier:', uniqueId);
+        console.error('Current state of groupedMeetings at error:', groupedMeetings);
+    }
+});
+
 
 
 
@@ -315,6 +316,15 @@ function logToJira(groupedMeetings) {
             });
         });
     });
+}
+
+function simpleHash(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0; // Convert to 32bit integer
+    }
+    return hash;
 }
 
 function populateTicketDropdown(inputElement) {
