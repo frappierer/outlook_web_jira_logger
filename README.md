@@ -32,14 +32,6 @@ For the Extension to work the Url pattern must follow "https://*/calendar/view/*
 3. You can edit the duration and associate meetings with JIRA tickets directly in the extension sidebar.
 4. Click on the `Log to JIRA` button to log all the meetings to JIRA.
 
-## Contributing
-
-1. Fork the repository on GitHub.
-2. Clone the forked repository to your machine.
-3. Create a new branch to make your changes.
-4. Make your changes in your new branch.
-5. Push your changes back to your fork on GitHub.
-6. Create a pull request from your forked repository to the original repository.
 
 ## License
 
