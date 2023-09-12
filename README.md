@@ -4,6 +4,9 @@ This Chrome extension helps to log meetings directly from Outlook webview to JIR
 
 For the Extension to work the Url pattern must follow "https://*/calendar/view/*".
 
+![image](https://github.com/frappierer/outlook_web_jira_logger/assets/4376185/d3a3690f-333d-4537-bf41-1da778b9bcdc)
+
+
 ## Features
 
 - Extract and log meeting details automatically
