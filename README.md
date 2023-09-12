@@ -22,7 +22,8 @@ For the Extension to work the Url pattern must follow "https://*/calendar/view/*
 5. Click on the `Load unpacked` button.
 6. Navigate to the location where you cloned the repository and select the folder containing the extension files.
 7. The extension should now be installed and you will see it in your list of extensions.
-8. Add your Jira Credentials via the Options Page: ![Options Page](https://github.com/frappierer/outlook_web_jira_logger/assets/4376185/45ada6d0-609e-425a-a312-3fafbbfa7922)
+8. Go to https://id.atlassian.com/manage-profile/security/api-tokens to create a jira token.
+9. Add your Jira Credentials via the Options Page: ![Options Page](https://github.com/frappierer/outlook_web_jira_logger/assets/4376185/45ada6d0-609e-425a-a312-3fafbbfa7922)
 
 
 ## Usage
