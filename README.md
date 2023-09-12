@@ -1,8 +1,8 @@
 # Chrome Extension for Jira Integration
 
-This Chrome extension helps to log meetings directly from Outlook webview to JIRA with ease. It shows a sidebar with all meetings of the current view. In the sidebar you can then edit the meetings and log them in bulk to jira.
+This Chrome extension helps to log meetings directly from Outlook webview to **JIRA Cloud** (On-prem is untested) with ease. It shows a sidebar with all meetings of the current view. In the sidebar, you can then edit the meetings and log them in bulk to jira.
 
-For the Extension to work the Url pattern must follow "https://*/calendar/view/*".
+For the Extension to work the Url pattern must follow `https://*/calendar/view/*`.
 
 ![image](https://github.com/frappierer/outlook_web_jira_logger/assets/4376185/d3a3690f-333d-4537-bf41-1da778b9bcdc)
 
@@ -18,7 +18,7 @@ For the Extension to work the Url pattern must follow "https://*/calendar/view/*
 
 ## Installation
 
-1. Clone the repository to your local machine using `git clone <repository-link>`.
+1. Clone or [download](https://github.com/frappierer/outlook_web_jira_logger/archive/refs/heads/main.zip) the repository to your local machine.
 2. Open the Google Chrome browser.
 3. Go to `chrome://extensions/`.
 4. Check the `Developer mode` checkbox.
@@ -35,10 +35,4 @@ For the Extension to work the Url pattern must follow "https://*/calendar/view/*
 2. The extension will automatically extract meeting details from the page and group them by date.
 3. You can edit the duration and associate meetings with JIRA tickets directly in the extension sidebar.
 4. Click on the `Log to JIRA` button to log all the meetings to JIRA.
-
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-- JIRA API: For enabling seamless integration with JIRA to log hours.
 
