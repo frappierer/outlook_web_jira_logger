@@ -1,3 +1,8 @@
+# Remarks 
+* Currently the Extension is parsing only German calender entries
+* You find a more sophisticated version of this [https://github.com/Tylopilus/jira-timebooker](https://github.com/Tylopilus/jira-timebooker) here. Englisch Kalender is also working there.
+
+
 # Chrome Extension for Jira Integration
 
 This Chrome extension helps to log meetings directly from Outlook webview to **JIRA Cloud** (On-prem is untested) with ease. It shows a sidebar with all meetings of the current view. In the sidebar, you can then edit the meetings and log them in bulk to jira.
