@@ -49,6 +49,7 @@ function initializeUI() {
             }
         }
     });
+    
     // Add this to stop the propagation of the click event inside the sidebar
 $('#sidebar').on('click', function(event) {
     event.stopPropagation();
@@ -153,7 +154,7 @@ function populateSidebar(groupedMeetings) {
         dateSection.append(dateHeader);
         dateMeetings.forEach((meeting, index) => {
             let uniqueId = `${meeting.date}|${meeting.startTimeISO}|${simpleHash(meeting.title)}`;
-            dateSection.append(`<div class="meeting-item" data-unique-id="${uniqueId}">Title: ${meeting.title} - <input type="text" value="${meeting.durationMinutes}" class="minutes-input" style="width: 40px;"> min.<input type="text" value="${meeting.jiraTicket}" class="jira-ticket-input"><button data-date="${date}" data-unique-id="${date}|${meeting.startTimeISO}|${simpleHash(meeting.title)}" class="delete-meeting-button">X</button></div>`);
+            dateSection.append(`<div class="meeting-item" data-unique-id="${uniqueId}">Title: <input type="text" value="${meeting.title}" class="title-input"> - <input type="text" value="${meeting.durationMinutes}" class="minutes-input" style="width: 40px;"> min.<input type="text" value="${meeting.jiraTicket}" class="jira-ticket-input"><button data-date="${date}" data-unique-id="${date}|${meeting.startTimeISO}|${simpleHash(meeting.title)}" class="delete-meeting-button">X</button></div>`);
 
             // Add event listener to the input field
             let minutesInputElement = dateSection.find('.minutes-input').last();
@@ -221,9 +222,6 @@ function populateSidebar(groupedMeetings) {
 });
 
 
-
-
-
 }
 
 
@@ -266,7 +264,7 @@ function logToJira(groupedMeetings) {
         $(this).find('.meeting-item').each(function(index) {
             //console.log("Inside meeting item loop");
             let meeting = dateMeetings[index];
-            let title = meeting.title;
+            let title = $(this).find('.title-input').val();
             let time = meeting.time;
 
             let minutesInput = $(this).find('.minutes-input'); // Add this line
