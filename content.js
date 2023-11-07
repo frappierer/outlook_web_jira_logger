@@ -89,7 +89,7 @@ function extractMeetingDetails() {
     $('div[role="button"][class*="root-"]').each(function() {
         let meeting = {};
         // Extract meeting title
-        let titleDiv = $(this).find('div[class*="sNIPV"]');
+        let titleDiv = $(this).find('div[class*="NGLVH"], div[class*="X2DO9"]');
         if (titleDiv.length > 0) {
             meeting.title = titleDiv.contents().filter(function() {
                 return this.nodeType === 3; // Node.TEXT_NODE
